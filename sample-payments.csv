@@ -1,6 +1,0 @@
-coffeeType,price,currency,loyaltyCardId,idempotencyKey
-LATTE,3.50,EUR,card-001,order-001
-ESPRESSO,2.00,EUR,card-002,order-002
-CAPPUCCINO,4.00,EUR,card-003,order-003
-AMERICANO,3.00,EUR,,order-004
-FLAT_WHITE,4.50,EUR,card-005,order-005
