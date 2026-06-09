@@ -28,7 +28,7 @@ public class SyncReport {
 
         for (SyncEntry entry : entries) {
             String status = entry.success() ? "OK" : "FAIL";
-            System.out.printf("[%s] %s | %s %.2f %s | id=%s",
+            System.out.printf("[%s] %s | %.2f %s | id=%s",
                     status,
                     entry.coffeeType(),
                     entry.price(),
