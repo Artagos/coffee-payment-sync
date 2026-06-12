@@ -24,8 +24,7 @@ public class PaymentSyncRunner implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         if (args.length == 0) {
-            System.err.println("Usage: java -jar coffee-payment-sync.jar <path-to-csv>");
-            System.exit(1);
+            return;
         }
 
         Path csvPath = Path.of(args[0]);
