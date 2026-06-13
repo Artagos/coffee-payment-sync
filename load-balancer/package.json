@@ -1,0 +1,10 @@
+{
+  "name": "coffee-payment-load-balancer",
+  "version": "1.0.0",
+  "description": "Smart load balancer for coffee-payment-sync instances",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test-load-balancer.js"
+  }
+}

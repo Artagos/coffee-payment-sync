@@ -1,0 +1,62 @@
+
+services:
+  app1:
+    build: .
+    hostname: app1
+    ports:
+      - "9091:9090"
+    environment:
+      - INSTANCE_ID=app-1
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:9090/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    mem_limit: 512m
+    cpus: 0.5
+
+  app2:
+    build: .
+    hostname: app2
+    ports:
+      - "9092:9090"
+    environment:
+      - INSTANCE_ID=app-2
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:9090/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    mem_limit: 1g
+    cpus: 1.0
+
+  app3:
+    build: .
+    hostname: app3
+    ports:
+      - "9093:9090"
+    environment:
+      - INSTANCE_ID=app-3
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:9090/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    mem_limit: 1.5g
+    cpus: 1.5
+
+  load-balancer:
+    build: ./load-balancer
+    hostname: lb
+    ports:
+      - "9090:9090"
+    environment:
+      - BACKENDS=app1:9090,app2:9090,app3:9090
+      - LB_PORT=9090
+      - HEALTH_INTERVAL=5000
+    depends_on:
+      - app1
+      - app2
+      - app3
+    mem_limit: 256m
+    cpus: 0.5
