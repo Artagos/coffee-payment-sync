@@ -23,3 +23,6 @@ logs/
 
 .DS_Store
 Thumbs.db
+
+# Local implementation plan
+plan.md
