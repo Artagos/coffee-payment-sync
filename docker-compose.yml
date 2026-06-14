@@ -1,0 +1,128 @@
+
+services:
+  postgres-metadata:
+    image: postgres:16
+    hostname: postgres-metadata
+    environment:
+      POSTGRES_DB: metadata
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d metadata"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  postgres-shard-0:
+    image: postgres:16
+    hostname: postgres-shard-0
+    environment:
+      POSTGRES_DB: payments
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d payments"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  postgres-shard-1:
+    image: postgres:16
+    hostname: postgres-shard-1
+    environment:
+      POSTGRES_DB: payments
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+    ports:
+      - "5434:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d payments"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app1:
+    build: .
+    hostname: app1
+    ports:
+      - "9091:9090"
+    environment:
+      - INSTANCE_ID=app-1
+    depends_on:
+      postgres-metadata:
+        condition: service_healthy
+      postgres-shard-0:
+        condition: service_healthy
+      postgres-shard-1:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:9090/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    mem_limit: 512m
+    cpus: 0.5
+
+  app2:
+    build: .
+    hostname: app2
+    ports:
+      - "9092:9090"
+    environment:
+      - INSTANCE_ID=app-2
+    depends_on:
+      postgres-metadata:
+        condition: service_healthy
+      postgres-shard-0:
+        condition: service_healthy
+      postgres-shard-1:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:9090/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    mem_limit: 1g
+    cpus: 1.0
+
+  app3:
+    build: .
+    hostname: app3
+    ports:
+      - "9093:9090"
+    environment:
+      - INSTANCE_ID=app-3
+    depends_on:
+      postgres-metadata:
+        condition: service_healthy
+      postgres-shard-0:
+        condition: service_healthy
+      postgres-shard-1:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:9090/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    mem_limit: 1.5g
+    cpus: 1.5
+
+  load-balancer:
+    build: ./load-balancer
+    hostname: lb
+    ports:
+      - "9090:9090"
+    environment:
+      - BACKENDS=app1:9090,app2:9090,app3:9090
+      - LB_PORT=9090
+      - HEALTH_INTERVAL=5000
+    depends_on:
+      - app1
+      - app2
+      - app3
+    mem_limit: 256m
+    cpus: 0.5
